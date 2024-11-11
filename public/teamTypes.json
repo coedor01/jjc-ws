@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "label": "名剑大会2对2",
+    "maxMemberCount": 2
+  },
+  {
+    "id": 2,
+    "label": "名剑大会3对3",
+    "maxMemberCount": 3
+  },
+  {
+    "id": 3,
+    "label": "名剑大会5对5",
+    "maxMemberCount": 5
+  }
+]
