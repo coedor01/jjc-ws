@@ -3,6 +3,7 @@ const { readLocalJsonFile, getRandomInt } = require("./utils");
 const { $当前状态 } = require("./actions");
 const { 客户端事件 } = require("./events");
 const { 状态类型 } = require("./const");
+const { logger } = require("./log");
 
 const io = new Server(13000, {
   cors: {
@@ -17,7 +18,8 @@ const clientTypes = readLocalJsonFile("clientTypes.json");
 const roomsMap = new Map();
 
 io.on("connection", (socket) => {
-  console.log(
+  // 连上后，5秒内需要发送鉴权包，否则自动断开连接
+  logger.info(
     `客户端 ${socket.handshake.address} 等待鉴权，5秒钟未鉴权将自动关闭连接`
   );
 
@@ -30,7 +32,9 @@ io.on("connection", (socket) => {
   }, 5000);
 
   socket.on("disconnect", () => {
-    console.log(`客户端 ${socket.handshake.address} 断开连接`);
+    logger.info(
+      `客户端 ${socket.handshake.address} 因超时未鉴权，自动断开连接`
+    );
   });
 
   socket.on(客户端事件.鉴权, (msg) => {
@@ -53,10 +57,13 @@ io.on("connection", (socket) => {
           myRoom: null,
         },
       });
-      console.log(`客户端 ${socket.handshake.address} 鉴权成功`);
-      console.log(`${name}·${server} 登陆成功`);
+      logger.info(
+        `客户端 ${socket.handshake.address} 鉴权成功，角色 ${name}·${server} 登陆成功。`
+      );
     } else {
-      console.log(`客户端 ${socket.handshake.address} 鉴权失败，关闭连接`);
+      logger.info(
+        `客户端 ${socket.handshake.address} 鉴权失败，角色 ${name}·${server} 登陆失败。`
+      );
       socket.disconnect(true);
     }
   });
@@ -67,8 +74,8 @@ io.on("connection", (socket) => {
       id = getRandomInt(100000, 999999);
     } while (id && roomsMap.has(id));
     roomsMap.set(id, { id, password: msg.password });
-    console.log(
-      `${name}·${server} 新建房间，房间号为：${id}；密码为 ${msg.password}`
+    logger.info(
+      `角色 ${name}·${server} 新建房间：房间号为 ${id}，密码为 ${msg.password}。`
     );
     $当前状态(socket, {
       状态: 状态类型.房间中,
@@ -104,7 +111,7 @@ io.on("connection", (socket) => {
         detail: "房间密码错误",
       });
     }
-    console.log(`密码校验成功，${name}·${server} 加入 ${msg.roomId} 房间`);
+    logger.info(`角色 ${name}·${server} 加入 ${msg.roomId} 房间。`);
     $当前状态(socket, {
       状态: 状态类型.房间中,
       数据: {
@@ -132,4 +139,4 @@ io.on("connection", (socket) => {
   socket.on(客户端事件.队伍中_发送消息, (msg) => {});
 });
 
-console.log("Socket.IO server running on port 13000");
+logger.info("Socket.IO 服务在端口13000上运行。");
