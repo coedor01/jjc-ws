@@ -15,4 +15,12 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-module.exports = { readLocalJsonFile, getRandomInt };
+function getRoom(id) {
+  return `ROOM-${id}`;
+}
+
+function getRoleLabel({ server, name }) {
+  return `${server}·${name}`;
+}
+
+module.exports = { readLocalJsonFile, getRandomInt, getRoom, getRoleLabel };
